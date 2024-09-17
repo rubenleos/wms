@@ -1,0 +1,168 @@
+
+users {
+	id integer pk
+	slug text
+	first_name text
+	last_name text
+	avatar text
+	email text
+	email_validated text
+	phone numeric
+	company text
+	status bool
+	created_at integer
+	last_login integer
+	}, integer
+	orders integer
+	alm_orig integer
+	alm_dest integer
+	created_by integer
+	updated_at integer
+	updated_by integer
+}
+
+role_user {
+	id integer pk increments unique
+	created_at varchar
+	updated_at varchar
+	user_id text *> users.id
+}
+
+Porders {
+	id varchar(5) pk increments unique
+	alm text
+	cve_pro text
+	cve_cpr text
+	ref text
+	notes text
+	requested_at text null
+	expected_at text
+	received_at text
+	created_at integer
+	updated_at integer
+	updated_by integer *> users.id
+	completed_at integer
+	completed_by integer *> users.id
+}
+
+orders {
+	id varchar(36)
+	alm_orig text
+	alm_dest text
+	created_at datetime
+	created_by varchar(36) > users.id
+	updated_at datetime
+	updated_by varchar(36) > users.id
+}
+
+porder_lines {
+	id varchar(36) pk
+	porder_id varchar(36) *> Porders.id
+	item_id varchar(36) *> item.id
+	avg_cost float
+	quantity int
+}
+
+order_lines {
+	id varchar(36) pk
+	order_id varchar(36) *> orders.id
+	item_id varchar(36) *> items.id
+	avg_cost float
+	quantity int
+}
+
+receipts {
+	id varchar(36) pk
+	porder_id varchar(10) *> Porders.id
+	alm text
+	cve_pro text
+	ref text
+	notes text
+	created_at datetime
+	updated_at datetime
+	updated_by varchar(36)
+	completed_at datetime
+	completed_by varchar(36)
+}
+
+locations_limit {
+	id varchar(36) pk
+	location_id varchar(36) *> locations.id
+	limitante int
+}
+
+locations {
+	id varchar(5) pk
+	status enum
+	created_at datetime
+	created_by varchar(36) > users.id
+	updated_at datetime
+	updated_by varchar(36) > users.id
+	limits_id varchar(5)
+}
+
+item {
+	id varchar(36) pk
+	cve_pro text
+	category_id varchar(36) *> categories.id
+	description text
+	picture text
+	tags text
+	available float
+	existencia float
+	unit_in text
+	unit_out text
+	fac_ent_sal float
+	juego float
+	weight float
+	avg_cost float
+	created_at datetime
+	updated_at datetime
+}
+
+service_items {
+	id varchar(36) pk
+	description text
+	picture text
+	tags text
+	available float
+	existencia float
+	weight float
+	avg_cost float
+	created_at datetime
+	updated_at datetime
+}
+
+containers {
+	id varchar(36) pk
+	location_id varchar(36) *> locations.id
+	service_item_id varchar(36) *> service_items.id
+	weight float
+}
+
+container_items {
+	id varchar(36) pk
+	container_id varchar(36) *> containers.id
+	item_id varchar(36) *> item.id
+	quantity float
+}
+
+categories {
+	id varchar(36) pk
+	parent_category varchar(36) *> categories.id
+	slug text
+	name text
+	description text
+	tags text
+	created_at datetime
+	updated_at datetime
+}
+
+credentials {
+	provider_id varchar(255)
+	provider_key text
+	user_id uuid *> users.id
+	hasher varchar(255)
+	password_hash text
+	password_salt text
+}
