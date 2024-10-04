@@ -7,7 +7,7 @@ from sqlalchemy import text
 from datetime import datetime
 import logging
 from functions import compare_cve_pro
-from models import db, porders ,users,locations ,locations,containers,container_items,service_items,location_items,receipts,receipts_lines,transactions,item,porder_lines,locations,locationsLimit,roles,sites
+from models import db, porders ,users,locations ,containers,container_items,service_items,location_items,receipts,receipts_lines,transactions,item,porder_lines,locationsLimit,roles,sites
 from schemas import ma, POrderSchema ,UserSchema,LocationSchema,ContainerSchema,ContainerItemSchema,LocationItemSchema,ReceiptSchema,ReceiptLinesSchema,TransactionSchema,ItemSchema,PordersLinesSchema,LocationsLimitsSchemas,RolesSchema,sitesSchema
 from config.config import Config  # Importa la clase Config
 import re
@@ -17,7 +17,7 @@ app.config.from_object(Config)
 
 db.init_app(app)   # Inicializamos SQLAlchemy con la app
 
-ma = Marshmallow(app)
+ma = Marshmallow(appc)
 # Define el modelo para representar la tabla 
 porder_schema = POrderSchema()
 user_schema =UserSchema()
@@ -32,7 +32,7 @@ receipt_schema = ReceiptSchema()
 porder_l_schema = PordersLinesSchema()
 locationsLimitsSchemas = LocationsLimitsSchemas()
 roles_schema=RolesSchema()
-sites_schema =sitesSchema()
+sites_schema = sitesSchema()
 
 @app.route('/')
 def hello():
@@ -324,6 +324,7 @@ def createLocations():
                 return jsonify({'No existe': 'No existe Limite'}), 400    
         new_location = locations(
             id=data['id'], 
+            site_id=data['site_id'],
             status=data['status'],
             created_at=datetime.utcnow(),  
             created_by=data['created_by'],
@@ -336,18 +337,18 @@ def createLocations():
         return locationSchema.jsonify(new_location), 201
     except IntegrityError as e:
         db.session.rollback()
-        logging.error(f"Error de integridad al crear item: {e}")
+        logging.error(f"Error de integridad al crear Location: {e}")
         return jsonify({"error": "Error de integridad de datos. Verifica las claves foráneas y restricciones únicas."}), 400
 
     except DataError as e:
         db.session.rollback()
-        logging.error(f"Error de tipo de datos al crear item: {e}")
+        logging.error(f"Error de tipo de datos al crear location: {e}")
         return jsonify({"error": "Error de tipo de datos. Verifica los valores ingresados."}), 400
 
     except Exception as e:
         db.session.rollback()
-        logging.error(f"Error inesperado al crear item: {e}")
-        return jsonify({"error": "Ocurrió un error al crear la location."}), 500    
+        logging.error(f"Error inesperado al crear location: {e}")
+        return jsonify({"error": f"Ocurrió un error al crear la location.{e}"}), 500    
 
 @app.route('/receipts2', methods=['POST'])
 def create_receipt2():
@@ -722,17 +723,24 @@ def crear_rol():
     return transaction_schema.jsonify(new_rol), 201
 
 
-@app.route('/sites',methods=['POST'])
+@app.route('/sites', methods=['POST'])
 def crear_site():
     data = request.get_json()
 
-    new_site=sites(
-        id=data['id']
-    )
-    db.session.add(new_site)
-    db.session.commit()
-    return transaction_schema(new_site)
+    # Check if a site with this ID already exists
+    existing_site = sites.query.filter_by(id=data['id']).first()
+    if existing_site:
+        return jsonify({'error': 'Site with this ID already exists'}), 400  # Bad Request
 
+    new_site = sites(id=data['id'])
+    db.session.add(new_site)
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()  # Rollback the transaction in case of error
+        return jsonify({'error': 'Site with this ID already exists'}), 400 
+
+    return sites_schema.jsonify(new_site)
 
 if __name__ == '__main__':
     with app.app_context():

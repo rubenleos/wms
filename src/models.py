@@ -39,6 +39,7 @@ class users(db.Model):
 
 class locations(db.Model):
     id = db.Column(db.String(36), primary_key=True)
+    site_id = db.Column(db.String(36),db.ForeignKey('Sites.id'))
     status = db.Column(db.Enum('active', 'inactive'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     created_by = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
@@ -161,7 +162,8 @@ class roles(db.Model):
     editar_ordenes = db.Column(db.Boolean)
     
 class sites(db.Model):
-    id = db.Column(db.Varchar, primary_key=True)
+    __tablename__ = 'Sites'
+    id = db.Column(db.String, primary_key=True)
 
 __all__ = ['db', 'porders', 'locations', 'users', 'containers', 'container_items', 'service_items',
         'location_items', 'receipts', 'receipt_items', 'transactions','item','porder_lines','roles','sites']     
