@@ -96,7 +96,8 @@ class sitesSchema(ma.SQLAlchemyAutoSchema):
         model = sites
         load_instance = True
     id = ma.auto_field()
-class OrderCpr(ma.SQLAlchemyAutoSchema):
+
+class OrderCprSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ordencpr
         load_instance = True
