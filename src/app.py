@@ -7,8 +7,8 @@ from sqlalchemy import text
 from datetime import datetime
 import logging
 from functions import compare_cve_pro
-from models import db, porders ,users,locations ,containers,container_items,service_items,location_items,receipts,receipts_lines,transactions,item,porder_lines,locationsLimit,roles,sites
-from schemas import ma, POrderSchema ,UserSchema,LocationSchema,ContainerSchema,ContainerItemSchema,LocationItemSchema,ReceiptSchema,ReceiptLinesSchema,TransactionSchema,ItemSchema,PordersLinesSchema,LocationsLimitsSchemas,RolesSchema,sitesSchema
+from models import db, porders ,users,locations ,containers,container_items,service_items,location_items,receipts,receipts_lines,transactions,item,porder_lines,locationsLimit,roles,sites,ordencpr
+from schemas import ma, POrderSchema ,UserSchema,LocationSchema,ContainerSchema,ContainerItemSchema,LocationItemSchema,ReceiptSchema,ReceiptLinesSchema,TransactionSchema,ItemSchema,PordersLinesSchema,LocationsLimitsSchemas,RolesSchema,sitesSchema,OrderCprSchema
 from config.config import Config  # Importa la clase Config
 import re
 app = Flask(__name__)
@@ -33,6 +33,7 @@ porder_l_schema = PordersLinesSchema()
 locationsLimitsSchemas = LocationsLimitsSchemas()
 roles_schema=RolesSchema()
 sites_schema = sitesSchema()
+order_schema = OrderCprSchema()
 
 @app.route('/')
 def hello():
@@ -747,7 +748,7 @@ def get_cpr_ord():
     try:
        all_cpr = ordencpr.query.all()
        #serialisar las cpr
-       result = OrderCpr.dump(all_cpr)
+       result = order_schema.dump(all_cpr)
        return jsonify(result)
     except Exception as e:
         return jsonify({"error": str(e)}), 500    
