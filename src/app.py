@@ -742,6 +742,17 @@ def crear_site():
 
     return sites_schema.jsonify(new_site)
 
+@app.route('/ordencpr',methods=['GET'])
+def get_cpr_ord():
+    try:
+       all_cpr = ordencpr.query.all()
+       #serialisar las cpr
+       result = OrderCpr.dump(all_cpr)
+       return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500    
+    
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()

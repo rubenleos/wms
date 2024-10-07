@@ -165,6 +165,23 @@ class sites(db.Model):
     __tablename__ = 'Sites'
     id = db.Column(db.String, primary_key=True)
 
+class ordencpr(db.Model):
+    c_ord = db.Column(db.String,nulleable=False)
+    c_alm=db.Column(db.String)
+    c_sub_alm = db.Column(db.String)
+    c_provedor = db.Column(db.String)
+    c_fecha_ord  =db.Column(db.String)
+    c_fec_ent_pro=db.Column(db.String)
+    c_comprador=db.Column(db.Integer)
+    c_plazo = db.Column(db.Integer)
+
+
+
+
+
+
+
+
 __all__ = ['db', 'porders', 'locations', 'users', 'containers', 'container_items', 'service_items',
         'location_items', 'receipts', 'receipt_items', 'transactions','item','porder_lines','roles','sites']     
 
