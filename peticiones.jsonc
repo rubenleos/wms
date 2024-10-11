@@ -1,0 +1,30 @@
+/**http://127.0.0.1:5000/sites  post */
+sitess{
+    "id":"1233"
+
+},
+
+/** http://127.0.0.1:5000/containers post*/
+{
+    "id": "AB127", 
+    "location_id": "AB001", 
+    "service_item_id": "001", 
+    "weight": 50.5
+},
+
+//** http://127.0.0.1:5000/roles post */
+{
+    "id":"1234",
+    "nombre": "Nuevo Rol",
+    "ver_ordenes_venta": true,
+    "picking": false,
+    "packing_despacho": true,
+    "recibir_mercancia": false,
+    "manejar_devoluciones": false,
+    "control_stock": false,
+    "reportes": false,
+    "servicio_cliente": false,
+    "acciones_avanzadas": false,
+    "editar_ordenes": false
+}
+

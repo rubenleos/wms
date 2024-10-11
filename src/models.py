@@ -166,16 +166,68 @@ class sites(db.Model):
     id = db.Column(db.String, primary_key=True)
 
 class ordencpr(db.Model):
-    c_ord = db.Column(db.String,nulleable=False)
+    __tablename__ = 'cprcpr'
+    c_ord = db.Column(db.String,primary_key=True,nullable=False)
     c_alm=db.Column(db.String)
     c_sub_alm = db.Column(db.String)
-    c_provedor = db.Column(db.String)
-    c_fecha_ord  =db.Column(db.String)
+    c_proveedor = db.Column(db.String)
+    c_fec_ord  =db.Column(db.String)
     c_fec_ent_pro=db.Column(db.String)
-    c_comprador=db.Column(db.Integer)
+    c_comprador=db.Column(db.String)
     c_plazo = db.Column(db.Integer)
 
+class cprdet(db.Model):
 
+    n_ord = db.Column(db.String,primary_key=True,nullable=False)
+    tipo= db.Column(db.String)
+    cve_art = db.Column(db.String)
+    fec_ent = db.Column(db.String)
+    costo= db.Column(db.String)
+    costo_neto = db.Column(db.String)
+
+class cprrme(db.Model):
+    __tablename__ = 'cprrme'
+    ibuff = db.Column(db.String(5), primary_key=True, nullable=False)  # Clave primaria, no permite nulos
+    cia =   db.Column(db.String(9))
+    ord =   db.Column(db.String(10))
+    n_rec = db.Column(db.String(6))
+    alm = db.Column(db.String(9))
+    st = db.Column(db.String(6))
+    proveedor = db.Column(db.String(9))
+    fr = db.Column(db.String(9))
+    factura = db.Column(db.String(9))
+    pedimento = db.Column(db.String(10))
+    referencia = db.Column(db.String(10))
+    tot_uni_rec = db.Column(db.Float)
+    TipoCambio = db.Column(db.Float)
+    tot_dsc = db.Column(db.Float)
+    tot_imp = db.Column(db.Float)
+    tot_fac = db.Column(db.Float)
+    t_imp_nor = db.Column(db.Float)
+    t_imp_esp = db.Column(db.Float)
+    t_imp_esp2 =db.Column(db.Float)
+    i_alm =   db.Column(db.String(9))
+    i_salm =  db.Column(db.String(9))
+    i_nent =  db.Column(db.String(9))
+    p_cad =   db.Column(db.String(9))
+    p_cia =   db.Column(db.String(9))
+    p_npag =  db.Column(db.String(9))
+    fec_rec = db.Column(db.String(9))
+    hra_rec = db.Column(db.String(9))
+    usr_rec = db.Column(db.String(9))
+    fec_afe = db.Column(db.String(9))
+    hra_afe = db.Column(db.String(9))
+    usr_afe = db.Column(db.String(9))
+    fec_mod = db.Column(db.String(9))
+    hra_mod = db.Column(db.String(9))
+    usr_mod = db.Column(db.String(9))
+    reset = db.Column(db.String(9))
+    directa = db.Column(db.String(9))
+    dep = db.Column(db.String(9))
+    nota_emb = db.Column(db.String(10))
+    buffer = db.Column(db.String(12))
+    TotalFlete = db.Column(db.Float)
+    IvaFlete = db.Column(db.Float)
 
 
 
@@ -183,6 +235,8 @@ class ordencpr(db.Model):
 
 
 __all__ = ['db', 'porders', 'locations', 'users', 'containers', 'container_items', 'service_items',
-        'location_items', 'receipts', 'receipt_items', 'transactions','item','porder_lines','roles','sites']     
+        'location_items', 'receipts', 'receipt_items', 'transactions','item','porder_lines','roles','sites','ordencpr']     
+
+
 
 

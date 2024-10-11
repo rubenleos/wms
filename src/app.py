@@ -7,8 +7,8 @@ from sqlalchemy import text
 from datetime import datetime
 import logging
 from functions import compare_cve_pro
-from models import db, porders ,users,locations ,containers,container_items,service_items,location_items,receipts,receipts_lines,transactions,item,porder_lines,locationsLimit,roles,sites,ordencpr
-from schemas import ma, POrderSchema ,UserSchema,LocationSchema,ContainerSchema,ContainerItemSchema,LocationItemSchema,ReceiptSchema,ReceiptLinesSchema,TransactionSchema,ItemSchema,PordersLinesSchema,LocationsLimitsSchemas,RolesSchema,sitesSchema,OrderCprSchema
+from models import db, porders ,users,locations ,containers,container_items,service_items,location_items,receipts,receipts_lines,transactions,item,porder_lines,locationsLimit,roles,sites,ordencpr,cprdet,cprrme
+from schemas import ma, POrderSchema ,UserSchema,LocationSchema,ContainerSchema,ContainerItemSchema,LocationItemSchema,ReceiptSchema,ReceiptLinesSchema,TransactionSchema,ItemSchema,PordersLinesSchema,LocationsLimitsSchemas,RolesSchema,sitesSchema,OrderCprSchema,CprdetSchema
 from config.config import Config  # Importa la clase Config
 import re
 app = Flask(__name__)
@@ -17,7 +17,7 @@ app.config.from_object(Config)
 
 db.init_app(app)   # Inicializamos SQLAlchemy con la app
 
-ma = Marshmallow(appc)
+ma = Marshmallow(app)
 # Define el modelo para representar la tabla 
 porder_schema = POrderSchema()
 user_schema =UserSchema()
@@ -34,6 +34,7 @@ locationsLimitsSchemas = LocationsLimitsSchemas()
 roles_schema=RolesSchema()
 sites_schema = sitesSchema()
 order_schema = OrderCprSchema()
+cprdetSchema=CprdetSchema()
 
 @app.route('/')
 def hello():
@@ -264,7 +265,7 @@ def create_transaction():
 @app.route('/items', methods=['POST'])
 def create_item():
     try:
-        data = request.get_json()
+        1
 
  
         new_item = item(
@@ -743,17 +744,129 @@ def crear_site():
 
     return sites_schema.jsonify(new_site)
 
+#implementacion 2
 @app.route('/ordencpr',methods=['GET'])
 def get_cpr_ord():
+    data = request.get_json()
+    ord_cpr = data.get('c_ord')
+    print(ord_cpr)
+    if not ord_cpr:
+        return jsonify({'message': 'order cpr is required'}), 400
+
     try:
-       all_cpr = ordencpr.query.all()
+       all_cpr = ordencpr.query.get(ord_cpr)
        #serialisar las cpr
        result = order_schema.dump(all_cpr)
        return jsonify(result)
     except Exception as e:
-        return jsonify({"error": str(e)}), 500    
-    
+        return jsonify({"error": str(e)}), 500
 
+#implementacion 3
+@app.route('/provedorcpr', methods=['GET'])
+def get_cpr_prov():
+    data = request.get_json()
+    c_proveedor = data.get('c_proveedor')
+    print(f"Proveedor recibido: {c_proveedor}")
+    
+    if not c_proveedor:
+        return jsonify({'message': 'c_proveedor is required'}), 400
+
+    try:
+        # En lugar de usar 'get', usa 'filter_by' o 'filter' para poder inspeccionar la query
+        query = ordencpr.query.filter_by(c_proveedor=c_proveedor)
+        
+        # Compilar la consulta SQL para ver qué se está ejecutando
+        print(query.statement.compile(compile_kwargs={"literal_binds": True}))
+
+        all_cpr = query.all()  # Ejecuta la consulta y obtiene todos los resultados
+        
+        if all_cpr:
+            result = order_schema.dump(all_cpr, many=True)  # 'many=True' si esperas varios resultados
+            print(result)
+            return jsonify(result)
+        else:
+            return jsonify({'message': 'No se encontró ningún registro con ese c_proveedor'}), 404
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+        #Implementacion 4
+
+#implementacion 4
+@app.route('/cprcpr_cprdet', methods=['GET'])
+def get_cprcpr_cprdet():
+    data = request.get_json()
+    fec_ent_param = data.get('fec_ent')
+    print(f"la fecha seleccionada es esta{fec_ent_param}")
+
+    try:
+        # Realizar el inner join entre cprcpr y cprdet
+        
+        #fec_ent_param = request.args.get('fec_ent')
+        print(f"fecha{fec_ent_param}")
+
+        query = db.session.query(ordencpr, cprdet).join(cprdet, ordencpr.c_ord == cprdet.n_ord).filter(cprdet.fec_ent == fec_ent_param)
+
+        # Imprimir la consulta SQL (opcional)
+        print(query.statement.compile(compile_kwargs={"literal_binds": True}))
+
+        # Ejecutar la consulta
+        results = query.all()
+
+        # Serializar los resultados (requiere definir esquemas para cprcpr y cprdet)
+        # ... (código para serializar los resultados) ...
+        serialized_results = []
+        for ordencpr_instance, cprdet_instance in results:
+            serialized_results.append({
+                "ordencpr": order_schema.dump(ordencpr_instance),
+                "cprdet": CprdetSchema().dump(cprdet_instance)
+            })
+
+        return jsonify(serialized_results)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+#cprme
+@app.route('/cprrme', methods=['PUT'])  # Usar PUT para actualizar
+def update_cprrme(ord):
+    try:
+        data = request.get_json()
+
+        # Obtener la instancia de cprrme a actualizar
+        cprrme_instance = cprrme.query.get(ord)
+
+        if not cprrme_instance:
+            return jsonify({'message': 'No se encontró ningún registro con ese '}), 404
+
+        # Actualizar los campos con los valores recibidos
+        for key, value in data.items():
+            if hasattr(cprrme_instance, key):  # Verificar si el atributo existe en el modelo
+                setattr(cprrme_instance, key, value)
+
+        db.session.commit()
+        return jsonify({'message': 'Registro actualizado correctamente'}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/cprrme', methods=['POST'])
+def create_cprrme():
+    try:
+        data = request.get_json()
+
+        # Crear una nueva instancia del modelo cprrme
+        new_cprrme = cprrme(**data) 
+
+        db.session.add(new_cprrme)
+        db.session.commit()
+
+        return jsonify({'message': 'Registro creado correctamente'}), 201
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()

@@ -1,5 +1,5 @@
 from flask_marshmallow import Marshmallow
-from models import porders,users ,locations,containers,container_items,service_items,location_items,receipts,receipts_lines,transactions,item,porder_lines,locationsLimit,roles,sites,ordencpr
+from models import porders,users ,locations,containers,container_items,service_items,location_items,receipts,receipts_lines,transactions,item,porder_lines,locationsLimit,roles,sites,ordencpr,cprdet,cprrme
 ma = Marshmallow() 
 
 class POrderSchema(ma.SQLAlchemyAutoSchema):
@@ -102,6 +102,15 @@ class OrderCprSchema(ma.SQLAlchemyAutoSchema):
         model = ordencpr
         load_instance = True
 
+class CprdetSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = cprdet
+        load_instance = True        
+
+class Cprme(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model =cprrme
+        load_instance = True
 
     
     
